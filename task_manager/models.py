@@ -16,9 +16,15 @@ STATUS = (
 class Project(models.Model):
     name = models.CharField(max_length=200)
 
+    def __str__(self):
+        return self.name
+
 
 class Status(models.Model):
     name = models.IntegerField(choices=STATUS)
+
+    def __str__(self):
+        return str(self.name)
 
 
 class Task(models.Model):
@@ -27,6 +33,9 @@ class Task(models.Model):
     status = models.ForeignKey(Status, on_delete=models.CASCADE)
     task_maker = models.ForeignKey(User, on_delete=models.CASCADE, related_name='task_maker')
     task_author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='task_author')
+
+    def __str__(self):
+        return self.name
 
 
 class Description(models.Model):
