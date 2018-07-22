@@ -4,17 +4,9 @@ from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth.models import User
 
-STATUS = (
-    (0, 'ready_for_dev'),
-    (1, 'review'),
-    (2, 'test'),
-    (3, 'ready_for_deployment'),
-    (4, 'done'),
-)
-
 
 class Project(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, default='inner')
 
     def natural_key(self):
         return self.name
@@ -24,17 +16,17 @@ class Project(models.Model):
 
 
 class Status(models.Model):
-    name = models.IntegerField(choices=STATUS)
+    name = models.CharField(max_length=200, default='new')
 
     def natural_key(self):
         return self.name
 
     def __str__(self):
-        return str(self.name)
+        return self.name
 
 
 class Task(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, default='task')
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     status = models.ForeignKey(Status, on_delete=models.CASCADE)
     task_maker = models.ForeignKey(User, on_delete=models.CASCADE, related_name='task_maker')

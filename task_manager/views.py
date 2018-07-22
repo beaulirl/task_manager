@@ -38,7 +38,7 @@ def get_task_info(task_id):
         task = Task.objects.get(pk=int(task_id))
     except ObjectDoesNotExist:
         return HttpResponseBadRequest('Error: there is no task with id {}'.format(task_id))
-    data = serializers.serialize('json', [task, ])
+    data = serializers.serialize('json', [task, ], use_natural_foreign_keys=True)
     return HttpResponse(data, content_type='application/json')
 
 
@@ -52,9 +52,10 @@ def update_task(request, task_id):
     for key, model, field in (
             ('task_maker', User, 'username'),
             ('status', Status, 'name')):
-        updated_value = get_or_none(model, put_params, key, field)
-        if updated_value:
-            updated_dict[key] = updated_value
+        if key in put_params.keys():
+            updated_value = get_or_none(model, put_params, key, field)
+            if updated_value:
+                updated_dict[key] = updated_value
     Task.objects.filter(pk=int(task_id)).update(**updated_dict)
     return HttpResponse(status=201)
 
@@ -84,6 +85,8 @@ def get_tasks(request):
 
 def create_task(request):
     post_params = json.loads(request.body)
+    if not post_params.get('name'):
+        return HttpResponseBadRequest('Error: there is no task name in post params')
     create_dict = {}
     for key, model, field in (
             ('task_maker', User, 'username'),
@@ -122,3 +125,4 @@ def add_comment(request, task_id):
     comment = TaskComment(comment=text, task=task)
     comment.save()
     return HttpResponse(status=201)
+
