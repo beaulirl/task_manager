@@ -1,5 +1,10 @@
 # Task Manager API
 
+### How to run this:
+* `docker pull ereutova/taskmanager_web`
+* `docker images`
+* `docker run -d -p 8000:8000 image_id`
+
 This manager helps to track your tasks.
 
 API supports the following methods:
@@ -22,7 +27,7 @@ API supports the following methods:
 **Error Response:**
 
   * **Code:** 400 Bad Request <br />
-  * **Content:** `'Error: no such field `field_name` in post params'`
+  * **Content:** `'Error: no such field "field_name" in post params'`
 
   OR
 
@@ -32,7 +37,7 @@ API supports the following methods:
   OR
 
   * **Code:** 400 Bad Request <br />
-  * **Content:** `'Error: there is no `field_name` with such name.'`
+  * **Content:** `'Error: there is no "field_name" with such name.'`
 
 ## Updating task (update status and task_maker)
 ### `PUT` /api/v1/tasks/:task_id
