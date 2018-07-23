@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.contrib import admin
+
 from .models import Project, Description, Comment, Task, Status
 
 admin.site.register(Project)
