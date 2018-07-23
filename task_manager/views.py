@@ -129,7 +129,9 @@ def get_or_none(model, params, key, field='name'):
 def add_comment(request, task_id):
     if request.method != 'POST':
         return HttpResponseBadRequest('Error: wrong HTTP method')
-    text = json.loads(request.body)['comment']
+    text = json.loads(request.body).get('comment')
+    if not text:
+        return HttpResponseBadRequest('Error: there is no comment in post params')
     try:
         task = Task.objects.get(pk=int(task_id))
     except ObjectDoesNotExist:

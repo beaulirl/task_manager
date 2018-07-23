@@ -239,6 +239,22 @@ class TestAPI(TestCase):
         self.assertEqual(comment.task.name, 'test_d')
         self.assertEqual(response.status_code, 201)
 
+    def test_add_comment_param_error(self):
+        """Test adding comment."""
+        project = Project.objects.create(name='test_project_5')
+        status = Status.objects.create(name='done')
+        task_maker = User.objects.create(username='Any')
+        task_author = User.objects.create(username='Rick')
+        task = Task(name='test_d', project=project, status=status, task_maker=task_maker, task_author=task_author)
+        task.save()
+        response = self.client.post(
+            '/api/v1/tasks/1/comments/',
+            data=json.dumps({}),
+            content_type='application/json'
+        )
+        self.assertEqual(response.content, 'Error: there is no comment in post params')
+        self.assertEqual(response.status_code, 400)
+
     def test_add_comment_error(self):
         """Test adding comment with wrong task_id."""
         response = self.client.post(
