@@ -90,8 +90,20 @@ def get_tasks(request):
         tasks = Task.objects.filter(**filter_dict)
     else:
         tasks = Task.objects.all()
-    data = serializers.serialize('json', tasks, use_natural_foreign_keys=True)
-    return HttpResponse(data, content_type='application/json')
+    task_results = []
+    for task in tasks:
+        comments = Comment.objects.filter(task__pk=int(task.pk))
+        descriptions = Description.objects.filter(task__pk=int(task.pk))
+        result = {
+            'task_id': task.pk,
+            'task_author': task.task_author.username,
+            'task_status': task.status.name,
+            'task_maker': task.task_maker.username,
+            'comments': [comment.comment for comment in comments],
+            'descriptions': [description.text for description in descriptions]
+        }
+        task_results.append(result)
+    return JsonResponse(task_results, safe=False)
 
 
 def create_task(request):

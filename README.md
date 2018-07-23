@@ -2,7 +2,7 @@
 
 This manager helps to track your tasks.
 
-It supports the following methods:
+API supports the following methods:
 
 ## Creating task
 ### `POST` /api/v1/tasks/
