@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-
-
 from __future__ import unicode_literals
 
 import json
@@ -9,10 +7,10 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from django.core import serializers
 from django.contrib.auth.models import User
-from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 
-from .models import Project, Task, Status, TaskComment
+
+from .models import Project, Task, Status, Comment, Description
 
 
 def index(request):
@@ -38,10 +36,18 @@ def get_task_info(task_id):
         Task.objects.get(pk=int(task_id))
     except ObjectDoesNotExist:
         return HttpResponseBadRequest('Error: there is no task with id {}'.format(task_id))
-    task_comment = TaskComment.objects.prefetch_related('task').filter(task__pk=int(task_id))
-    data = serializers.serialize('json', task_comment, use_natural_foreign_keys=True)
-
-    return HttpResponse(data, content_type='application/json')
+    task = Task.objects.select_related().get(pk=int(task_id))
+    comments = Comment.objects.filter(task__pk=int(task_id))
+    descriptions = Description.objects.filter(task__pk=int(task_id))
+    result = {
+        'task_id': task.pk,
+        'task_author': task.task_author.username,
+        'task_status': task.status.name,
+        'task_maker': task.task_maker.username,
+        'comments': [comment.comment for comment in comments],
+        'descriptions': [description.text for description in descriptions]
+    }
+    return JsonResponse(result)
 
 
 def update_task(request, task_id):
@@ -52,7 +58,7 @@ def update_task(request, task_id):
     put_params = json.loads(request.body)
     updated_dict = {}
     for key, model, field in (
-            ('task_maker', User, 'username'),
+            ('task_maker', User, 'pk'),
             ('status', Status, 'name')):
         if key in put_params.keys():
             updated_value = get_or_none(model, put_params, key, field)
@@ -60,7 +66,7 @@ def update_task(request, task_id):
                 return HttpResponseBadRequest('Error: there is no such {}'.format(key))
             updated_dict[key] = updated_value
     Task.objects.filter(pk=int(task_id)).update(**updated_dict)
-    return HttpResponse(status=201)
+    return HttpResponse(status=200)
 
 
 def delete_task(task_id):
@@ -79,6 +85,8 @@ def get_tasks(request):
         ):
             if request.GET.get(key):
                 filter_dict['{}__{}'.format(key, field)] = request.GET[key]
+        if not filter_dict:
+            return HttpResponseBadRequest('Error: wrong get params')
         tasks = Task.objects.filter(**filter_dict)
     else:
         tasks = Task.objects.all()
@@ -92,8 +100,8 @@ def create_task(request):
         return HttpResponseBadRequest('Error: there is no task name in post params')
     create_dict = {}
     for key, model, field in (
-            ('task_maker', User, 'username'),
-            ('task_author', User, 'username'),
+            ('task_maker', User, 'pk'),
+            ('task_author', User, 'pk'),
             ('status', Status, 'name'),
             ('project', Project, 'name')
     ):
@@ -109,7 +117,8 @@ def create_task(request):
 
 
 def get_or_none(model, params, key, field='name'):
-    query = {field: params[key]}
+    param = int(params[key]) if field == 'pk' else params[key]
+    query = {field: param}
     try:
         param = model.objects.get(**query)
     except ObjectDoesNotExist:
@@ -125,7 +134,6 @@ def add_comment(request, task_id):
         task = Task.objects.get(pk=int(task_id))
     except ObjectDoesNotExist:
         return HttpResponseBadRequest('Error: there is no task with id {}'.format(task_id))
-    comment = TaskComment(comment=text, task=task)
+    comment = Comment(comment=text, task=task, author=task.task_maker)
     comment.save()
     return HttpResponse(status=201)
-

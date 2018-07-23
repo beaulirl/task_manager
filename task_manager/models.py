@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
+
 
 
 class Project(models.Model):
@@ -17,6 +18,9 @@ class Project(models.Model):
 
 class Status(models.Model):
     name = models.CharField(max_length=200, default='new')
+
+    class Meta:
+        verbose_name_plural = 'Statuses'
 
     def natural_key(self):
         return self.name
@@ -44,9 +48,10 @@ class Description(models.Model):
     text = models.TextField()
 
 
-class TaskComment(models.Model):
+class Comment(models.Model):
     comment = models.TextField()
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='task_comment')
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.comment

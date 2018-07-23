@@ -7,7 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
 from django.test import TestCase, Client
 
-from .models import Project, Task, Status, TaskComment
+from .models import Project, Task, Status, Comment
 
 
 class TestAPI(TestCase):
@@ -20,7 +20,13 @@ class TestAPI(TestCase):
         status = Status.objects.create(name='review')
         task_maker = User.objects.create(username='Elena')
         task_author = User.objects.create(username='Anna')
-        Task.objects.create(name='test_e', project=project, status=status, task_maker=task_maker, task_author=task_author)
+        Task.objects.create(
+            name='test_e',
+            project=project,
+            status=status,
+            task_maker=task_maker,
+            task_author=task_author
+        )
         project_1 = Project.objects.create(name='test_project_get_1')
         status_1 = Status.objects.create(name='done')
         task_maker_1 = User.objects.create(username='Alex')
@@ -44,15 +50,33 @@ class TestAPI(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(json.loads(response.content)), 1)
 
+    def test_get_tasks_with_wrong_params(self):
+        """Test getting filtered tasks according to params."""
+        project = Project.objects.create(name='test_project_0')
+        status = Status.objects.create(name='review')
+        task_maker = User.objects.create(username='Roman')
+        task_author = User.objects.create(username='Alex')
+        Task.objects.create(
+            name='test_a',
+            project=project,
+            status=status,
+            task_maker=task_maker,
+            task_author=task_author
+        )
+        response = self.client.get('/api/v1/tasks/?wrong_status=review&wrong_task_maker=Roman&wrong_task_author=Alex')
+        self.assertEqual(response.content, 'Error: wrong get params')
+        self.assertEqual(response.status_code, 400)
+
     def test_get_task_info(self):
-        """Test updating task."""
+        """Test getting task info by id."""
         project = Project.objects.create(name='test_project_1')
         status = Status.objects.create(name='ready')
         task_maker = User.objects.create(username='Arseniy')
         task_author = User.objects.create(username='Alex')
         task = Task(name='test_s', project=project, status=status, task_maker=task_maker, task_author=task_author)
         task.save()
-        response = self.client.get('/api/v1/tasks/1/')
+        response = self.client.get('/api/v1/tasks/1/', content_type='application/json')
+        self.assertEqual(json.loads(response.content)['task_id'], 1)
         self.assertEqual(response.status_code, 200)
 
     def test_get_task_info_error(self):
@@ -67,7 +91,13 @@ class TestAPI(TestCase):
         status = Status.objects.create(name='ready for dev')
         task_maker = User.objects.create(username='Alla')
         task_author = User.objects.create(username='Jane')
-        Task.objects.create(name='test_f', project=project, status=status, task_maker=task_maker, task_author=task_author)
+        Task.objects.create(
+            name='test_f',
+            project=project,
+            status=status,
+            task_maker=task_maker,
+            task_author=task_author
+        )
         updated_status = Status.objects.create(name='dev')
         response = self.client.put(
             '/api/v1/tasks/1/',
@@ -75,7 +105,7 @@ class TestAPI(TestCase):
             content_type='application/json'
         )
         updated_task = Task.objects.get(pk=1)
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(updated_task.status, updated_status)
 
     def test_update_task_error(self):
@@ -126,8 +156,8 @@ class TestAPI(TestCase):
             data=json.dumps({
                 'status': 'review',
                 'name': 't1',
-                'task_maker': 'Anna',
-                'task_author': 'Elena',
+                'task_maker': '1',
+                'task_author': '2',
                 'project': 'test_project_4'
             }),
             content_type='application/json'
@@ -146,8 +176,8 @@ class TestAPI(TestCase):
             '/api/v1/tasks/',
             data=json.dumps({
                 'status': 'review',
-                'task_maker': 'Anna',
-                'task_author': 'Elena',
+                'task_maker': '1',
+                'task_author': '2',
                 'project': 'test_project_4'
             }),
             content_type='application/json'
@@ -165,8 +195,8 @@ class TestAPI(TestCase):
             data=json.dumps({
                 'status': 'review',
                 'name': 'task_5',
-                'task_maker': 'Anna',
-                'task_author': 'Elena',
+                'task_maker': '1',
+                'task_author': '2',
                 'project': 'test_project_4'
             }),
             content_type='application/json'
@@ -184,7 +214,7 @@ class TestAPI(TestCase):
             data=json.dumps({
                 'status': 'review',
                 'name': 'task_5',
-                'task_author': 'Elena',
+                'task_author': '2',
                 'project': 'test_project_4'
             }),
             content_type='application/json'
@@ -205,7 +235,7 @@ class TestAPI(TestCase):
             data=json.dumps({'comment': 'my_comment'}),
             content_type='application/json'
         )
-        comment = TaskComment.objects.get(task__pk=1)
+        comment = Comment.objects.get(task__pk=1)
         self.assertEqual(comment.task.name, 'test_d')
         self.assertEqual(response.status_code, 201)
 
