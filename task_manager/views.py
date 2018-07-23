@@ -35,10 +35,12 @@ def task_detail(request, task_id):
 
 def get_task_info(task_id):
     try:
-        task = Task.objects.get(pk=int(task_id))
+        Task.objects.get(pk=int(task_id))
     except ObjectDoesNotExist:
         return HttpResponseBadRequest('Error: there is no task with id {}'.format(task_id))
-    data = serializers.serialize('json', [task, ], use_natural_foreign_keys=True)
+    task_comment = TaskComment.objects.prefetch_related('task').filter(task__pk=int(task_id))
+    data = serializers.serialize('json', task_comment, use_natural_foreign_keys=True)
+
     return HttpResponse(data, content_type='application/json')
 
 
@@ -54,8 +56,9 @@ def update_task(request, task_id):
             ('status', Status, 'name')):
         if key in put_params.keys():
             updated_value = get_or_none(model, put_params, key, field)
-            if updated_value:
-                updated_dict[key] = updated_value
+            if not updated_value:
+                return HttpResponseBadRequest('Error: there is no such {}'.format(key))
+            updated_dict[key] = updated_value
     Task.objects.filter(pk=int(task_id)).update(**updated_dict)
     return HttpResponse(status=201)
 
@@ -68,11 +71,11 @@ def delete_task(task_id):
 def get_tasks(request):
     if request.GET:
         filter_dict = {}
-        for key, model, field in (
-                ('task_maker', User, 'username'),
-                ('task_author', User, 'username'),
-                ('status', Status, 'name'),
-                ('project', Project, 'name')
+        for key, field in (
+                ('task_maker', 'username'),
+                ('task_author', 'username'),
+                ('status', 'name'),
+                ('project', 'name')
         ):
             if request.GET.get(key):
                 filter_dict['{}__{}'.format(key, field)] = request.GET[key]
@@ -115,7 +118,7 @@ def get_or_none(model, params, key, field='name'):
 
 
 def add_comment(request, task_id):
-    if request.method == 'GET':
+    if request.method != 'POST':
         return HttpResponseBadRequest('Error: wrong HTTP method')
     text = json.loads(request.body)['comment']
     try:

@@ -46,4 +46,10 @@ class Description(models.Model):
 
 class TaskComment(models.Model):
     comment = models.TextField()
-    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='task_comment')
+
+    def __str__(self):
+        return self.comment
+
+    def natural_key(self):
+        return self.comment
