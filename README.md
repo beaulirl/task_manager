@@ -9,7 +9,7 @@ This manager helps to track your tasks.
 API supports the following methods:
 
 ## Creating task
-### `POST` /api/v1/tasks/
+### `POST` /api/v1/tasks
 
 **Post params**
 
@@ -68,7 +68,7 @@ API supports the following methods:
 * **Code:** 200
 
 ## Adding comment
-### `POST` /api/v1/tasks/:task_id/comments/
+### `POST` /api/v1/tasks/:task_id/comments
 
 **POST params**
 **Required:**
