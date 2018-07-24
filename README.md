@@ -2,8 +2,7 @@
 
 ### How to run this:
 * `docker pull ereutova/taskmanager_web`
-* `docker images`
-* `docker run -d -p 8000:8000 image_id`
+* `docker run -d -p 8000:8000 ereutova/taskmanager_web:latest`
 
 This manager helps to track your tasks.
 

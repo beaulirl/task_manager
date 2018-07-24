@@ -5,7 +5,6 @@ import json
 
 from django.core.exceptions import ObjectDoesNotExist
 
-from django.core import serializers
 from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 
@@ -14,6 +13,10 @@ from .models import Project, Task, Status, Comment, Description
 
 
 def index(request):
+    return HttpResponse('This is start page, please, find correct URLs for using API in README.md')
+
+
+def get_or_create(request):
     if request.method == 'GET':
         return get_tasks(request)
     elif request.method == 'POST':
