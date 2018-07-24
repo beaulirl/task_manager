@@ -47,6 +47,7 @@ def get_task_info(task_id):
         'task_author': task.task_author.username,
         'task_status': task.status.name,
         'task_maker': task.task_maker.username,
+        'project': task.project.name,
         'comments': [comment.comment for comment in comments],
         'descriptions': [description.text for description in descriptions]
     }
@@ -102,6 +103,7 @@ def get_tasks(request):
             'task_author': task.task_author.username,
             'task_status': task.status.name,
             'task_maker': task.task_maker.username,
+            'project': task.project.name,
             'comments': [comment.comment for comment in comments],
             'descriptions': [description.text for description in descriptions]
         }

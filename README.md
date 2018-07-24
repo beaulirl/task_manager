@@ -14,10 +14,10 @@ API supports the following methods:
 **Post params**
 
 **Required:**
-* `'task_maker'`
-* `'task_author'`
-* `'status'`
-* `'project'`
+* `'task_maker=[int]'`
+* `'task_author=[int]'`
+* `'status=[string]'`
+* `'project=[string]'`
 
 **Success Response:**
 
@@ -95,7 +95,7 @@ API supports the following methods:
 **Success Response:**
 
 * **Code:** 200 <br />
-* **Content:** `{"task_id": 1, "comments": ["1 comment", "2 comment"], "descriptions": ["Main description", "Not main description"], "task_author": "Anna", "task_status": "Done", "task_maker": "Elena"}`
+* **Content:** `{"task_id": 1, "comments": ["1 comment", "2 comment"], "descriptions": ["Main description", "Not main description"], "task_author": "Anna", "task_status": "Done", "project":"ART-HR", "task_maker": "Elena"}`
 
 **Error Response:**
 
