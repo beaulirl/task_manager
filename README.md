@@ -1,8 +1,8 @@
 # Task Manager API
 
 ### How to run this:
-* `docker pull ereutova/taskmanager_web`
-* `docker run -d -p 8000:8000 ereutova/taskmanager_web:latest`
+* `docker pull ereutova/task_manager`
+* `docker run -d -p 8000:8000 ereutova/task_manager`
 
 This manager helps to track your tasks.
 
